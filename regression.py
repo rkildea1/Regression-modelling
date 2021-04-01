@@ -89,4 +89,47 @@ for name,met in [\
     print('\n')
     
         
-        
+#x is defined way back up top
+
+                                        ###Carry out some Model Tuning
+import numpy as np
+print("Ridge Regression")
+print("Alpha\t RMSE_train\t RMSE_10cv\n")
+alpha = np.linspace(0.1,20,50)  
+t_rmse = np.array([])
+cv_rmse = np.array([])
+
+for a in alpha:
+    ridge = Ridge(fit_intercept=True, alpha=a)
+    
+    #computing the RMSE on training data 
+    ridge.fit(x,y)
+    p=ridge.predict(x)
+    err=p-y
+    total_error = np.dot(err,err)
+    rmse_train = np.sqrt(total_error/len(p))
+
+    #computing the rmse using 10-fold cross validation
+    kf =KFold(n_splits=10) #10 split
+    xval_err=0 # creating the variable for the accumulated error 
+    for train,test in kf.split(x): #for each split, 
+        ridge.fit(x[train],y[train]) #create the moidel and do the training
+        p=ridge.predict(x[test])
+        err=p-y[test]
+        xval_err += np.dot(err,err) # we accumulate the error this time (+=) 
+                        #.Dot product of two arrays x and y
+    rmse_10cv = np.sqrt(xval_err/len(x))
+    
+    t_rmse = np.append(t_rmse, [rmse_train])
+    cv_rmse = np.append(cv_rmse, [rmse_10cv])
+
+
+pl.plot(alpha, t_rmse, label="RMSE Train")
+pl.plot(alpha, cv_rmse,label="RMSE XVal")
+pl.legend(("RMSE Train", "RMSE XVal"))
+pl.ylabel,('RMSE')
+pl.xlabel,('Alpha')
+pl.show()
+          
+    
+    
